@@ -5,8 +5,37 @@ date: Jun 13 2023
 ---
 ### short conversation code help
 
-the code may not work and chat gpt can produce false results it is meant to be a guide essentially in this project. You start with the core concept and work outwords in different levels and chatgpt tends to do better that way. Just like image generating.
-mostly im doing this so I can access the code via my micro controlers with out having to deal with all the authentication updates ect.... enjoy the chaos I ended up researching some articles and found some code that is more authentic and I chopped it up abit and got the raspberry pi to recognise the oled display through the terminal and I ran the code adjusted the font ect. all in all was a fun project look forward to more! Ill post more on the how I achieved it later.
+
+
+```python
+
+import time
+# Define the animation frames
+frames = [
+    Image.new("1", (display.width, display.height)),
+    Image.new("1", (display.width, display.height)),
+    # Add more frames as needed
+]
+
+# Set the delay between frames (in seconds)
+frame_delay = 0.5
+
+# Main animation loop
+while True:
+    for frame in frames:
+        # Clear the display
+        display.fill(0)
+        display.show()
+
+        # Display the current frame
+        display.image(frame)
+        display.show()
+
+        # Delay before showing the next frame
+        time.sleep(frame_delay)
+
+        ```
+
 
 ### link,  [Click me for Conversation](https://chat.openai.com/share/1bcbd8e7-99a8-4923-b9f8-2f2278f0d799)
 
