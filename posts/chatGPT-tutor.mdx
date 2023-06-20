@@ -10,15 +10,20 @@ date: Jun 13 2023
 ```python
 
 import time
+
 # Define the animation frames
 frames = [
-    Image.new("1", (display.width, display.height)),
-    Image.new("1", (display.width, display.height)),
-    # Add more frames as needed
+    # Define frames if needed
 ]
 
 # Set the delay between frames (in seconds)
-frame_delay = 0.5
+frame_delay = 0.2
+
+# Initialize variables
+x = 0
+y = 0
+dx = 1
+dy = 1
 
 # Main animation loop
 while True:
@@ -27,24 +32,29 @@ while True:
         display.fill(0)
         display.show()
 
+        # Create a new image for each frame
+        image = Image.new("1", (display.width, display.height))
+
+        # Get the drawing object to draw on the image
+        draw = ImageDraw.Draw(image)
+
+        # Draw on the image for the current frame (bouncing ball)
+        draw.rectangle((0, 0, display.width, display.height), outline=0, fill=0)
+        draw.ellipse((x, y, x + 10, y + 10), outline=255, fill=255)
+        x += dx
+        y += dy
+
+        if x <= 0 or x >= display.width - 10:
+            dx = -dx
+        if y <= 0 or y >= display.height - 10:
+            dy = -dy
+
         # Display the current frame
-        display.image(frame)
+        display.image(image)
         display.show()
 
         # Delay before showing the next frame
         time.sleep(frame_delay)
-
-
-        # Draw on the image for the current frame (bouncing ball)
-draw.rectangle((0, 0, display.width, display.height), outline=0, fill=0)
-draw.ellipse((x, y, x + 10, y + 10), outline=255, fill=255)
-x += dx
-y += dy
-
-if x <= 0 or x >= display.width - 10:
-    dx = -dx
-if y <= 0 or y >= display.height - 10:
-    dy = -dy
 
 
         ```
