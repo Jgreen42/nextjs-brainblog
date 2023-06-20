@@ -11,15 +11,51 @@ date: Jun 13 2023
 
 import time
 
-# Define the animation frames
-frames = [
-    # Define frames if needed
-]
+# Parameters to Change
+BORDER = 5
+FONTSIZE = 10
 
-# Set the delay between frames (in seconds)
-frame_delay = 0.2
+spi = busio.SPI(board.SCK, MOSI=board.MOSI)
+dc = digitalio.DigitalInOut(board.D6)  # data/command
+cs = digitalio.DigitalInOut(board.CE0)  # Chip select
+reset = digitalio.DigitalInOut(board.D5)  # reset
 
-# Initialize variables
+display = adafruit_pcd8544.PCD8544(spi, dc, cs, reset)
+
+# Contrast and Brightness Settings
+display.bias = 4
+display.contrast = 60
+
+# Turn on the Backlight LED
+backlight = digitalio.DigitalInOut(board.D13)  # backlight
+backlight.switch_to_output()
+backlight.value = True
+
+# Clear display.
+display.fill(0)
+display.show()
+
+# Create blank image for drawing.
+# Make sure to create image with mode '1' for 1-bit color.
+image = Image.new("1", (display.width, display.height))
+
+# Get drawing object to draw on image.
+draw = ImageDraw.Draw(image)
+
+# Draw a black background
+draw.rectangle((0, 0, display.width, display.height), outline=255, fill=255)
+
+# Draw a smaller inner rectangle
+draw.rectangle(
+    (BORDER, BORDER, display.width - BORDER - 1, display.height - BORDER - 1),
+    outline=0,
+    fill=0,
+)
+
+# Load a TTF font.
+font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", FONTSIZE)
+
+# Animation variables
 x = 0
 y = 0
 dx = 1
@@ -27,35 +63,55 @@ dy = 1
 
 # Main animation loop
 while True:
-    for frame in frames:
-        # Clear the display
-        display.fill(0)
-        display.show()
+    # Clear the display
+    display.fill(0)
+    display.show()
 
-        # Create a new image for each frame
-        image = Image.new("1", (display.width, display.height))
+    # Create a new image for each frame
+    image = Image.new("1", (display.width, display.height))
 
-        # Get the drawing object to draw on the image
-        draw = ImageDraw.Draw(image)
+    # Get the drawing object to draw on the image
+    draw = ImageDraw.Draw(image)
 
-        # Draw on the image for the current frame (bouncing ball)
-        draw.rectangle((0, 0, display.width, display.height), outline=0, fill=0)
-        draw.ellipse((x, y, x + 10, y + 10), outline=255, fill=255)
-        x += dx
-        y += dy
+    # Draw a black background
+    draw.rectangle((0, 0, display.width, display.height), outline=255, fill=255)
 
-        if x <= 0 or x >= display.width - 10:
-            dx = -dx
-        if y <= 0 or y >= display.height - 10:
-            dy = -dy
+    # Draw a smaller inner rectangle
+    draw.rectangle(
+        (BORDER, BORDER, display.width - BORDER - 1, display.height - BORDER - 1),
+        outline=0,
+        fill=0,
+    )
 
-        # Display the current frame
-        display.image(image)
-        display.show()
+    # Load a TTF font.
+    font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", FONTSIZE)
 
-        # Delay before showing the next frame
-        time.sleep(frame_delay)
+    # Draw Some Text
+    text = "Hello World!"
+    (font_width, font_height) = font.getsize(text)
+    draw.text(
+        (display.width // 2 - font_width // 2, display.height // 2 - font_height // 2),
+        text,
+        font=font,
+        fill=255,
+    )
 
+    # Draw on the image for the current frame (bouncing ball)
+    draw.ellipse((x, y, x + 10, y + 10), outline=255, fill=255)
+    x += dx
+    y += dy
+
+    if x <= BORDER or x >= display.width - BORDER - 10:
+        dx = -dx
+    if y <= BORDER or y >= display.height - BORDER - 10:
+        dy = -dy
+
+    # Display the current frame
+    display.image(image)
+    display.show()
+
+    # Delay before showing the next frame
+    time.sleep(0.1)
 
         ```
 
