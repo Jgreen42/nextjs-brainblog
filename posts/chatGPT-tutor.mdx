@@ -34,6 +34,20 @@ while True:
         # Delay before showing the next frame
         time.sleep(frame_delay)
 
+        ===
+
+        # Draw on the image for the current frame (bouncing ball)
+draw.rectangle((0, 0, display.width, display.height), outline=0, fill=0)
+draw.ellipse((x, y, x + 10, y + 10), outline=255, fill=255)
+x += dx
+y += dy
+
+if x <= 0 or x >= display.width - 10:
+    dx = -dx
+if y <= 0 or y >= display.height - 10:
+    dy = -dy
+
+
         ```
 
 
