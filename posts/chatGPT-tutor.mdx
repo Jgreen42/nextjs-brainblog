@@ -8,7 +8,6 @@ date: Jun 13 2023
 
 
 ```python
-
 import time
 
 # Parameters to Change
@@ -56,13 +55,13 @@ draw.rectangle(
 font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", FONTSIZE)
 
 # Animation variables
-x = 0
-y = 0
+x = BORDER + 1
+y = BORDER + 1
 dx = 1
 dy = 1
 
-# Main animation loop
-while True:
+# Define the animation frames
+def draw_frame():
     # Clear the display
     display.fill(0)
     display.show()
@@ -96,7 +95,7 @@ while True:
         fill=255,
     )
 
-    # Draw on the image for the current frame (bouncing ball)
+    # Draw the bouncing ball
     draw.ellipse((x, y, x + 10, y + 10), outline=255, fill=255)
     x += dx
     y += dy
@@ -110,8 +109,14 @@ while True:
     display.image(image)
     display.show()
 
+# Main animation loop
+while True:
+    # Draw and display the current frame
+    draw_frame()
+
     # Delay before showing the next frame
     time.sleep(0.1)
+
 
         ```
 
