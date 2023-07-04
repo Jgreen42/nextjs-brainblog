@@ -1,121 +1,77 @@
 ---
 title: chatgpt coding help!
-description: "Obtaining help from Chat gpt asked help in seeing the script to run on thonny for my raspberry pi 4"
+description: "episode1 - displaying the rock hand on the nokia 5110/3110 monochrome lcd. I would have wiring diagrams but im on a level of wtf thats beyond me, but it works but please do your research please and thank you and always be safe lol. We are going to be using thonny attatched to my raspberry pi4 I obtained in a walmart parking lot. We will be using Thonny to run and test our scripts. Mine was put together by gpt and my self so its choppy but it works. We can use libraries but I wanted to do it programatically to see its capabilities. lets break shi* and have fun! Tschüss!"
 date: Jun 13 2023
 ---
-### short conversation code help
+### metallize life with chatGPT4 
 
 
 
 ```python
+import spidev
+import RPi.GPIO as GPIO
 import time
 
-# Parameters to Change
-BORDER = 5
-FONTSIZE = 10
+# Pin configuration.
+DC = 23
+RST = 24
+SPI_PORT = 0
+SPI_DEVICE = 0
 
-spi = busio.SPI(board.SCK, MOSI=board.MOSI)
-dc = digitalio.DigitalInOut(board.D6)  # data/command
-cs = digitalio.DigitalInOut(board.CE0)  # Chip select
-reset = digitalio.DigitalInOut(board.D5)  # reset
+# Create a dictionary with the hex codes for the commands.
+COMMANDS = {
+    "FUNCTION_SET": 0x20,
+    "POWER_DOWN": 0x04,
+    "ENTRY_MODE": 0x02,
+    "EXTENDED_INSTRUCTION": 0x01,
+    "DISPLAY_BLANK": 0x08,
+    "DISPLAY_NORMAL": 0x0c,
+    "DISPLAY_ALL_ON": 0x09,
+    "DISPLAY_INVERTED": 0x0d,
+    "SET_Y_ADDRESS": 0x40,
+    "SET_X_ADDRESS": 0x80
+}
 
-display = adafruit_pcd8544.PCD8544(spi, dc, cs, reset)
+def lcd_init():
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(DC, GPIO.OUT)
+    GPIO.setup(RST, GPIO.OUT)
+    spi = spidev.SpiDev()
+    spi.open(SPI_PORT, SPI_DEVICE)
+    spi.max_speed_hz = 4000000
 
-# Contrast and Brightness Settings
-display.bias = 4
-display.contrast = 60
-
-# Turn on the Backlight LED
-backlight = digitalio.DigitalInOut(board.D13)  # backlight
-backlight.switch_to_output()
-backlight.value = True
-
-# Clear display.
-display.fill(0)
-display.show()
-
-# Create blank image for drawing.
-# Make sure to create image with mode '1' for 1-bit color.
-image = Image.new("1", (display.width, display.height))
-
-# Get drawing object to draw on image.
-draw = ImageDraw.Draw(image)
-
-# Draw a black background
-draw.rectangle((0, 0, display.width, display.height), outline=255, fill=255)
-
-# Draw a smaller inner rectangle
-draw.rectangle(
-    (BORDER, BORDER, display.width - BORDER - 1, display.height - BORDER - 1),
-    outline=0,
-    fill=0,
-)
-
-# Load a TTF font.
-font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", FONTSIZE)
-
-# Animation variables
-x = BORDER + 1
-y = BORDER + 1
-dx = 1
-dy = 1
-
-# Define the animation frames
-def draw_frame():
-    # Clear the display
-    display.fill(0)
-    display.show()
-
-    # Create a new image for each frame
-    image = Image.new("1", (display.width, display.height))
-
-    # Get the drawing object to draw on the image
-    draw = ImageDraw.Draw(image)
-
-    # Draw a black background
-    draw.rectangle((0, 0, display.width, display.height), outline=255, fill=255)
-
-    # Draw a smaller inner rectangle
-    draw.rectangle(
-        (BORDER, BORDER, display.width - BORDER - 1, display.height - BORDER - 1),
-        outline=0,
-        fill=0,
-    )
-
-    # Load a TTF font.
-    font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", FONTSIZE)
-
-    # Draw Some Text
-    text = "Hello World!"
-    (font_width, font_height) = font.getsize(text)
-    draw.text(
-        (display.width // 2 - font_width // 2, display.height // 2 - font_height // 2),
-        text,
-        font=font,
-        fill=255,
-    )
-
-    # Draw the bouncing ball
-    draw.ellipse((x, y, x + 10, y + 10), outline=255, fill=255)
-    x += dx
-    y += dy
-
-    if x <= BORDER or x >= display.width - BORDER - 10:
-        dx = -dx
-    if y <= BORDER or y >= display.height - BORDER - 10:
-        dy = -dy
-
-    # Display the current frame
-    display.image(image)
-    display.show()
-
-# Main animation loop
-while True:
-    # Draw and display the current frame
-    draw_frame()
-
-    # Delay before showing the next frame
+    GPIO.output(RST, GPIO.LOW)
     time.sleep(0.1)
+    GPIO.output(RST, GPIO.HIGH)
+
+    # Set the LCD mode.
+    lcd_send([COMMANDS["FUNCTION_SET"] | COMMANDS["POWER_DOWN"]], False)
+    lcd_send([COMMANDS["FUNCTION_SET"]], False)
+    lcd_send([COMMANDS["DISPLAY_NORMAL"]], False)
+
+    # Clear the LCD RAM.
+    lcd_clear()
+
+    return spi
+
+def lcd_send(data, is_data=True, chunk_size=1024):
+    GPIO.output(DC, is_data)
+    for i in range(0, len(data), chunk_size):
+        end = i + chunk_size
+        spi.writebytes(data[i:end])
+
+def lcd_clear():
+    lcd_send([0x80, 0x40] + [0x00] * (6 * 84), False)
+
+# Initialization of LCD
+spi = lcd_init()
+
+# Let's draw a pattern
+pattern = [0xAA] * 84 # A checkerboard pattern
+for bank in range(6):
+    lcd_send([COMMANDS["SET_Y_ADDRESS"] | bank], False)
+    lcd_send([COMMANDS["SET_X_ADDRESS"]], False)
+    lcd_send(pattern)
 
 
         ```
